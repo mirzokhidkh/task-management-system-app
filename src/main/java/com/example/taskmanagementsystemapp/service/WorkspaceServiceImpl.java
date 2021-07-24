@@ -1,5 +1,6 @@
 package com.example.taskmanagementsystemapp.service;
 
+import com.example.taskmanagementsystemapp.payload.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -7,17 +8,14 @@ import com.example.taskmanagementsystemapp.entity.*;
 import com.example.taskmanagementsystemapp.entity.enums.AddType;
 import com.example.taskmanagementsystemapp.entity.enums.WorkspacePermissionName;
 import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
-import com.example.taskmanagementsystemapp.payload.ApiResponse;
-import com.example.taskmanagementsystemapp.payload.MemberDTO;
-import com.example.taskmanagementsystemapp.payload.WorkspaceDTO;
 import com.example.taskmanagementsystemapp.repository.*;
 
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_GUEST;
+import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_MEMBER;
 
 
 @Service
@@ -34,6 +32,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     WorkspacePermissionRepository workspacePermissionRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    MailService mailService;
 
     @Override
     public ApiResponse addWorkspace(WorkspaceDTO workspaceDTO, User user) {
@@ -55,7 +55,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 null
         ));
         WorkspaceRole adminRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, WorkspaceRoleName.ROLE_ADMIN.name(), null));
-        WorkspaceRole memberRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, WorkspaceRoleName.ROLE_MEMBER.name(), null));
+        WorkspaceRole memberRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, ROLE_MEMBER.name(), null));
         WorkspaceRole guestRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, WorkspaceRoleName.ROLE_GUEST.name(), null));
 
 
@@ -73,7 +73,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                         adminRole,
                         workspacePermissionName));
             }
-            if (workspacePermissionName.getWorkspaceRoleNames().contains(WorkspaceRoleName.ROLE_MEMBER)) {
+            if (workspacePermissionName.getWorkspaceRoleNames().contains(ROLE_MEMBER)) {
                 workspacePermissions.add(new WorkspacePermission(
                         memberRole,
                         workspacePermissionName));
@@ -101,8 +101,28 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse editWorkspace(WorkspaceDTO workspaceDTO) {
-        return null;
+    public ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO) {
+        Workspace editingWorkspace = workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id"));
+        editingWorkspace.setName(workspaceDTO.getName());
+        editingWorkspace.setColor(workspaceDTO.getColor());
+        editingWorkspace.setAvatar(attachmentRepository
+                .findById(workspaceDTO.getAvatarId()).orElseThrow(() -> new ResourceNotFoundException(workspaceDTO.getAvatarId().toString())));
+        workspaceRepository.save(editingWorkspace);
+        return new ApiResponse("Workspace edited", true);
+    }
+
+    @Override
+    public ApiResponse editOwner(Long id, UUID userId, User user) {
+        User newOwner = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("id"));
+        WorkspaceUser workspaceUser = workspaceUserRepository
+                .findByWorkspaceIdAndUserId(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
+        workspaceUser.setUser(newOwner);
+        workspaceUserRepository.save(workspaceUser);
+
+        Workspace editingWorkspace = workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id"));
+        editingWorkspace.setOwner(newOwner);
+        workspaceRepository.save(editingWorkspace);
+        return new ApiResponse("Workspace owner edited", true);
     }
 
     @Override
@@ -122,10 +142,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public ApiResponse addOrEditOrRemoveWorkspace(Long id, MemberDTO memberDTO) {
+        User member = userRepository.findById(memberDTO.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
         if (memberDTO.getAddType().equals(AddType.ADD)) {
             WorkspaceUser workspaceUser = new WorkspaceUser(
                     workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id")),
-                    userRepository.findById(memberDTO.getId()).orElseThrow(() -> new ResourceNotFoundException("id")),
+                    member,
                     workspaceRoleRepository.findById(memberDTO.getRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")),
                     new Timestamp(System.currentTimeMillis()),
                     null
@@ -133,6 +154,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             workspaceUserRepository.save(workspaceUser);
 
             //TODO EMAILGA INVITE XABAR YUBORISH
+            String text = "Confirm => http://localhost:8080/api/workspace/join?id=" + id;
+            mailService.sendEmail(member.getEmail(), "Confirm account", text);
+
         } else if (memberDTO.getAddType().equals(AddType.EDIT)) {
             WorkspaceUser workspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(id, memberDTO.getId()).orElseGet(WorkspaceUser::new);
             workspaceUser.setWorkspaceRole(workspaceRoleRepository.findById(memberDTO.getRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")));
@@ -140,7 +164,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         } else if (memberDTO.getAddType().equals(AddType.REMOVE)) {
             workspaceUserRepository.deleteByWorkspaceIdAndUserId(id, memberDTO.getId());
         }
-        return new ApiResponse("Muvaffaqiyatli", true);
+        return new ApiResponse("Successfully done", true);
     }
 
     @Override
@@ -154,4 +178,59 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
         return new ApiResponse("Error", false);
     }
+
+    @Override
+    public List<User> getMembersAndGuests(Long id) {
+
+        List<User> users = userRepository.findMembersAndGuestsFromWorkspace(Arrays.asList(
+                workspaceRoleRepository.findByName(ROLE_MEMBER.name()).getId(),
+                workspaceRoleRepository.findByName(ROLE_GUEST.name()).getId()
+        ));
+
+        return users;
+    }
+
+    @Override
+    public List<Workspace> getAll() {
+        List<Workspace> workspaceList = workspaceRepository.findAll();
+        return workspaceList;
+    }
+
+    @Override
+    public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO) {
+        if (workspaceRoleRepository.existsByName(workspaceRoleDTO.getName())) {
+            return new ApiResponse("Role with such a name already exists", false);
+        }
+        WorkspaceRole workspaceRole = new WorkspaceRole(
+                workspaceRepository.findById(workspaceRoleDTO.getWorkspaceId()).orElseThrow(() -> new ResourceNotFoundException("id")),
+                workspaceRoleDTO.getName(),
+                workspaceRoleDTO.getExtendsRole()
+        );
+
+        workspaceRoleRepository.save(workspaceRole);
+        return new ApiResponse("Role added", true);
+    }
+
+    @Override
+    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO) {
+        WorkspacePermission workspacePermission = new WorkspacePermission(
+                workspaceRoleRepository.findById(workspacePermissionDTO.getWorkspaceRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")),
+                workspacePermissionDTO.getPermission()
+        );
+        workspacePermissionRepository.save(workspacePermission);
+        return new ApiResponse("Permission added", true);
+    }
+
+    @Override
+    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO) {
+        UUID id = workspacePermissionRepository.getId(workspacePermissionDTO.getWorkspaceRoleId(), workspacePermissionDTO.getPermission().name());
+        try {
+            workspacePermissionRepository.deleteById(id);
+            return new ApiResponse("Permission removed", true);
+        } catch (Exception e) {
+            return new ApiResponse("Error", false);
+        }
+    }
+
+
 }

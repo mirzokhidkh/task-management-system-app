@@ -1,8 +1,15 @@
 package com.example.taskmanagementsystemapp.service;
 
+import com.example.taskmanagementsystemapp.payload.LoginDTO;
+import com.example.taskmanagementsystemapp.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,7 +20,9 @@ import com.example.taskmanagementsystemapp.entity.enums.SystemRoleName;
 import com.example.taskmanagementsystemapp.payload.ApiResponse;
 import com.example.taskmanagementsystemapp.payload.RegisterDTO;
 import com.example.taskmanagementsystemapp.repository.UserRepository;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.validation.Valid;
 import java.util.Optional;
 import java.util.Random;
 
@@ -24,6 +33,10 @@ public class AuthService implements UserDetailsService {
     UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    JwtProvider jwtProvider;
+    @Autowired
+    AuthenticationManager authenticationManager;
     @Autowired
     JavaMailSender javaMailSender;
 
@@ -49,6 +62,21 @@ public class AuthService implements UserDetailsService {
         sendEmail(user.getEmail(), user.getEmailCode());
         return new ApiResponse("User saqlandi", true);
     }
+
+    public ApiResponse login(LoginDTO loginDTO) {
+        try {
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    loginDTO.getEmail(),
+                    loginDTO.getPassword()
+            ));
+            User user = (User) authenticate.getPrincipal();
+            String token = jwtProvider.generateToken(user.getEmail());
+            return new ApiResponse("Token", true, token);
+        } catch (Exception e) {
+            return new ApiResponse("Parol yoki login xato", false);
+        }
+    }
+
 
     public Boolean sendEmail(String sendingEmail, String emailCode) {
         try {

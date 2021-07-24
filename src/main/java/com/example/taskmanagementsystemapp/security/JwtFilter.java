@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uz.pdp.appclickup.service.AuthService;
+import com.example.taskmanagementsystemapp.service.AuthService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

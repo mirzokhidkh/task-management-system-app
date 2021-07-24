@@ -3,7 +3,7 @@ package com.example.taskmanagementsystemapp.config;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import uz.mk.apphrmanagement.entity.User;
+import com.example.taskmanagementsystemapp.entity.User;
 
 import java.util.Optional;
 import java.util.UUID;
