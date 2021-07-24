@@ -36,6 +36,11 @@ public class Workspace extends AbsLongEntity {
     }
 
 
-
+    public Workspace(String name, String color, User owner, Attachment avatar) {
+        this.name = name;
+        this.color = color;
+        this.owner = owner;
+        this.avatar = avatar;
+    }
 
 }
