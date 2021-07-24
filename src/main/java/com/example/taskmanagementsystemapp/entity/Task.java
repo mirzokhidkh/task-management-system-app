@@ -1,23 +1,22 @@
 package com.example.taskmanagementsystemapp.entity;
 
 import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import java.util.Date;
-import java.util.List;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Task extends AbsLongEntity {
+public class Task extends AbsUUIDEntity {
 
     @Column(nullable = false)
     private String name;

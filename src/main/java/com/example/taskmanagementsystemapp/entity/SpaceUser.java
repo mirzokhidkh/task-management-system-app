@@ -1,6 +1,6 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class SpaceUser extends AbsLongEntity {
+public class SpaceUser extends AbsUUIDEntity {
     @ManyToOne(optional = false)
     private Space space;
 

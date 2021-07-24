@@ -1,6 +1,7 @@
 package com.example.taskmanagementsystemapp.entity;
 
 import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TaskHistory extends AbsLongEntity {
+public class TaskHistory extends AbsUUIDEntity {
     @ManyToOne
     private Task task;
 
