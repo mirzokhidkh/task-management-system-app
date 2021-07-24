@@ -1,11 +1,10 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -14,7 +13,7 @@ import javax.persistence.OneToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TaskAttachment extends AbsEntity {
+public class TaskAttachment extends AbsLongEntity {
     @ManyToOne
     private Task task;
 

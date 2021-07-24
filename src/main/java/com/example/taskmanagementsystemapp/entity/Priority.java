@@ -1,6 +1,6 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Priority extends AbsEntity {
+public class Priority extends AbsLongEntity {
     @Column(nullable = false)
     private String name;
 

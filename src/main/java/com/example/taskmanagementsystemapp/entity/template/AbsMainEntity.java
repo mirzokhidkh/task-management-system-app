@@ -15,15 +15,9 @@ import java.sql.Timestamp;
 
 @MappedSuperclass
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AbsEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false,updatable = false)
+public class AbsMainEntity {
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Timestamp createdAt;
 
@@ -31,6 +25,7 @@ public abstract class AbsEntity {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
+    @JoinColumn(updatable = false)
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy;
@@ -38,7 +33,4 @@ public abstract class AbsEntity {
     @LastModifiedBy
     @ManyToOne(fetch = FetchType.LAZY)
     private User updatedBy;
-
-
-
 }

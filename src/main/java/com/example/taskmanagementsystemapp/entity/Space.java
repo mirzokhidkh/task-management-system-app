@@ -1,6 +1,6 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Space extends AbsEntity {
+public class Space extends AbsLongEntity {
 
     @Column(nullable = false)
     private String name;
@@ -38,15 +38,6 @@ public class Space extends AbsEntity {
 
     @Column(nullable = false)
     private String accessType;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<User> memberList;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<ClickApp> clickAppList;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<View> viewList;
 
 
 

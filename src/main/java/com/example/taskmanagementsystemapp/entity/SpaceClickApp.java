@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
@@ -13,10 +12,10 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class CheckList extends AbsLongEntity {
-    @Column(nullable = false)
-    private String name;
+public class SpaceClickApp extends AbsLongEntity {
+    @ManyToOne(optional = false)
+    private Space space;
 
-    @ManyToOne
-    private Task task;
+    @ManyToOne(optional = false)
+    private ClickApp clickApp;
 }

@@ -1,6 +1,7 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import javax.persistence.Entity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Attachment extends AbsEntity {
+public class Attachment extends AbsUUIDEntity {
     @Column(nullable = false)
     private String name;
 

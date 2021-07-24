@@ -1,20 +1,18 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.enums.Permission;
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Workspace extends AbsEntity {
+public class Workspace extends AbsLongEntity {
 
     @Column(nullable = false)
     private String name;
@@ -22,18 +20,21 @@ public class Workspace extends AbsEntity {
     @Column(nullable = false)
     private String color;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User owner;
 
     @Column(nullable = false)
     private String initialLetter;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Attachment avatar;
 
-    @Enumerated(value = EnumType.STRING)
-    @ElementCollection(fetch = FetchType.LAZY)
-    private List<Permission> permissionList;
+    @PrePersist
+    @PreUpdate
+    public void setInitialLetterMyMethod() {
+        this.initialLetter = name.substring(0, 1);
+    }
+
 
 
 

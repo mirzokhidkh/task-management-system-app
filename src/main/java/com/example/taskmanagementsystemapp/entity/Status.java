@@ -1,20 +1,19 @@
 package com.example.taskmanagementsystemapp.entity;
 
 import com.example.taskmanagementsystemapp.entity.enums.StatusType;
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Status extends AbsEntity {
+public class Status extends AbsLongEntity {
 
     @Column(nullable = false)
     private String name;

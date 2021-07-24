@@ -1,12 +1,13 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 
 
@@ -14,7 +15,7 @@ import javax.persistence.OneToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "users")
-public class User extends AbsEntity {
+public class User extends AbsUUIDEntity {
 
     @Column(nullable = false)
     private String fullName;
@@ -31,7 +32,7 @@ public class User extends AbsEntity {
     @Column(nullable = false)
     private String initialLetter;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Attachment avatar;
 
 

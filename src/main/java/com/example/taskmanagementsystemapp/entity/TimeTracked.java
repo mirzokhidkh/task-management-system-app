@@ -1,7 +1,7 @@
 package com.example.taskmanagementsystemapp.entity;
 
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TimeTracked extends AbsEntity {
+public class TimeTracked extends AbsLongEntity {
     @ManyToOne
     private  Task task;
 

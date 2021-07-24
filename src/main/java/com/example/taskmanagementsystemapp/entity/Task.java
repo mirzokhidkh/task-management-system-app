@@ -1,6 +1,6 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsEntity;
+import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Task extends AbsEntity {
+public class Task extends AbsLongEntity {
 
     @Column(nullable = false)
     private String name;
@@ -54,11 +54,5 @@ public class Task extends AbsEntity {
 
     @Column(nullable = false)
     private Date activatedDate;
-
-    @ManyToMany
-    private List<Tag> tagList;
-
-    @ManyToMany
-    private List<User> userList;
 
 }
