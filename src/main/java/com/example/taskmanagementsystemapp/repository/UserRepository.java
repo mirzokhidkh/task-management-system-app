@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "where wu.workspace_role_id in (?1)",
             nativeQuery = true)
     List<User> findMembersAndGuestsFromWorkspace(Collection<UUID> uuids);
+
+//  @Query(value = "select *from users",nativeQuery = true)
+//    List<User> findMembersAndGuestsFromWorkspace(Collection<UUID> uuids);
 }

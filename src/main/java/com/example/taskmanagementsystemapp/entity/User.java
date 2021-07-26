@@ -29,10 +29,8 @@ public class User extends AbsUUIDEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String color;
 
-    @Column(nullable = false)
     private String initialLetter;
 
     @OneToOne(fetch = FetchType.LAZY)

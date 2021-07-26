@@ -1,15 +1,14 @@
 package com.example.taskmanagementsystemapp.controller;
 
+import com.example.taskmanagementsystemapp.entity.User;
 import com.example.taskmanagementsystemapp.entity.Workspace;
 import com.example.taskmanagementsystemapp.payload.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.example.taskmanagementsystemapp.entity.User;
 import com.example.taskmanagementsystemapp.security.CurrentUser;
 import com.example.taskmanagementsystemapp.service.WorkspaceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -20,6 +19,13 @@ import java.util.UUID;
 public class WorkspaceController {
     @Autowired
     WorkspaceService workspaceService;
+
+    /**
+     *
+     * @param workspaceDTO
+     * @param user
+     * @return
+     */
 
     @PostMapping
     public HttpEntity<?> addWorkspace(@Valid @RequestBody WorkspaceDTO workspaceDTO, @CurrentUser User user) {
@@ -48,24 +54,11 @@ public class WorkspaceController {
      * @return
      */
 
-    @PutMapping("/editOwner/{id}")
-    public HttpEntity<?> editOwner(@PathVariable Long id, @PathVariable UUID userId, @CurrentUser User user) {
-        ApiResponse apiResponse = workspaceService.editOwner(id, userId, user);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-    }
-
-    /**
-     * @param id
-     * @param ownerId
-     * @return
-     */
     @PutMapping("/changeOwner/{id}")
-    public HttpEntity<?> changeOwnerWorkspace(@PathVariable Long id,
-                                              @RequestParam UUID ownerId) {
-        ApiResponse apiResponse = workspaceService.changeOwnerWorkspace(id, ownerId);
+    public HttpEntity<?> changeOwnerWorkspace(@PathVariable Long id, @PathVariable UUID userId, @CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.changeOwnerWorkspace(id, userId, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
 
     /**
      * ISHXONANI O'CHIRISH

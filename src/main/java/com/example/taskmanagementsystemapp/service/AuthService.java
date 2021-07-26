@@ -56,6 +56,7 @@ public class AuthService implements UserDetailsService {
                 passwordEncoder.encode(registerDTO.getPassword()),
                 SystemRoleName.SYSTEM_USER
         );
+        user.setEnabled(true);
         int code = new Random().nextInt(999999);
         user.setEmailCode(String.valueOf(code).substring(0, 4));
         userRepository.save(user);

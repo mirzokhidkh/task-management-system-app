@@ -14,9 +14,7 @@ public interface WorkspaceService {
 
     ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO);
 
-    ApiResponse editOwner(Long id, UUID userId, User user);
-
-    ApiResponse changeOwnerWorkspace(Long id, UUID ownerId);
+    ApiResponse changeOwnerWorkspace(Long id, UUID ownerId, User user);
 
     ApiResponse deleteWorkspace(Long id);
 

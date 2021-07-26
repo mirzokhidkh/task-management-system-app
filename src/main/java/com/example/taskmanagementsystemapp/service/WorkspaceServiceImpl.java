@@ -40,12 +40,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         //WORKSPACE OCHDIK
         if (workspaceRepository.existsByOwnerIdAndName(user.getId(), workspaceDTO.getName()))
             return new ApiResponse("Sizda bunday nomli ishxona mavjud", false);
+
         Workspace workspace = new Workspace(
                 workspaceDTO.getName(),
                 workspaceDTO.getColor(),
                 user,
                 workspaceDTO.getAvatarId() == null ? null : attachmentRepository.findById(workspaceDTO.getAvatarId()).orElseThrow(() -> new ResourceNotFoundException("attachment"))
         );
+
         workspaceRepository.save(workspace);
 
         //WORKSPACE ROLE OCHDIK
@@ -100,6 +102,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return new ApiResponse("Ishxona saqlandi", true);
     }
 
+
     @Override
     public ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO) {
         Workspace editingWorkspace = workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id"));
@@ -112,8 +115,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse editOwner(Long id, UUID userId, User user) {
-        User newOwner = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("id"));
+    public ApiResponse changeOwnerWorkspace(Long id, UUID ownerId, User user) {
+        User newOwner = userRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("id"));
         WorkspaceUser workspaceUser = workspaceUserRepository
                 .findByWorkspaceIdAndUserId(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
         workspaceUser.setUser(newOwner);
@@ -123,11 +126,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         editingWorkspace.setOwner(newOwner);
         workspaceRepository.save(editingWorkspace);
         return new ApiResponse("Workspace owner edited", true);
-    }
-
-    @Override
-    public ApiResponse changeOwnerWorkspace(Long id, UUID ownerId) {
-        return null;
     }
 
     @Override
