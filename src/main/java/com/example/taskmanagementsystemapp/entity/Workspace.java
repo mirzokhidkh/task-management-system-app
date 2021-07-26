@@ -3,11 +3,13 @@ package com.example.taskmanagementsystemapp.entity;
 import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

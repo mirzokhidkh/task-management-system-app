@@ -1,10 +1,13 @@
 package com.example.taskmanagementsystemapp.service;
 
+import com.example.taskmanagementsystemapp.entity.User;
+import com.example.taskmanagementsystemapp.entity.enums.SystemRoleName;
+import com.example.taskmanagementsystemapp.payload.ApiResponse;
 import com.example.taskmanagementsystemapp.payload.LoginDTO;
+import com.example.taskmanagementsystemapp.payload.RegisterDTO;
+import com.example.taskmanagementsystemapp.repository.UserRepository;
 import com.example.taskmanagementsystemapp.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,14 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.example.taskmanagementsystemapp.entity.User;
-import com.example.taskmanagementsystemapp.entity.enums.SystemRoleName;
-import com.example.taskmanagementsystemapp.payload.ApiResponse;
-import com.example.taskmanagementsystemapp.payload.RegisterDTO;
-import com.example.taskmanagementsystemapp.repository.UserRepository;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.validation.Valid;
 import java.util.Optional;
 import java.util.Random;
 
@@ -49,7 +45,7 @@ public class AuthService implements UserDetailsService {
 
     public ApiResponse registerUser(RegisterDTO registerDTO) {
         if (userRepository.existsByEmail(registerDTO.getEmail()))
-            return new ApiResponse("Bunday user mavjud", false);
+            return new ApiResponse("Bunday emailli user mavjud", false);
         User user = new User(
                 registerDTO.getFullName(),
                 registerDTO.getEmail(),

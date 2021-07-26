@@ -9,7 +9,7 @@ import java.util.Date;
 @Component
 public class JwtProvider {
     private static final long expireTime = 1000 * 60 * 60 * 24;
-    private static final String secretKey = "maxfiysuzhechkimbilmasin";
+    private static final String secretKey = "neverfindnever";
 
     public String generateToken(String username) {
         Date expireDate = new Date(System.currentTimeMillis() + expireTime);

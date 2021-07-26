@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @MappedSuperclass
 @Data
@@ -27,10 +28,8 @@ public class AbsMainEntity {
 
     @JoinColumn(updatable = false)
     @CreatedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User createdBy;
+    private UUID createdBy;
 
     @LastModifiedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User updatedBy;
+    private UUID updatedBy;
 }
