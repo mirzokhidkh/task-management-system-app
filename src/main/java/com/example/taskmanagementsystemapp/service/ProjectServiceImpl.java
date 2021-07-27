@@ -62,6 +62,22 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ApiResponse editProject(Long projectId, ProjectDTO projectDTO, User user) {
+        if (projectRepository.existsByNameAndSpaceIdAndIdNot(projectDTO.getName(), projectDTO.getSpaceId(), projectId)) {
+            return new ApiResponse("Project with such a name and space already exists", false);
+        }
+        Project editingProject = projectRepository.findById(projectId).get();
+        editingProject.setName(projectDTO.getName());
+        editingProject.setSpace(spaceRepository.findById(projectDTO.getSpaceId()).orElseThrow(() -> new ResourceNotFoundException("space ID")));
+        editingProject.setAccessType(projectDTO.getAccessType());
+        editingProject.setArchived(projectDTO.isArchived());
+        editingProject.setColor(projectDTO.getColor());
+        projectRepository.save(editingProject);
+
+        return new ApiResponse("Project edited", true);
+    }
+
+    @Override
     public ApiResponse deleteProject(Long projectId, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();

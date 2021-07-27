@@ -9,6 +9,8 @@ public interface ProjectService {
 
     ApiResponse addProject(ProjectDTO projectDTO, User user);
 
+    ApiResponse editProject(Long projectId, ProjectDTO projectDTO, User user);
+
     ApiResponse deleteProject(Long projectId, User user);
 
     ApiResponse addProjectUser(ProjectUserDTO projectUserDTO, User user);
