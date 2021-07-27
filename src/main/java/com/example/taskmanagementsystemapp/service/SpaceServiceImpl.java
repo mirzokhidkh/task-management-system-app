@@ -33,7 +33,7 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     public ApiResponse addSpace(SpaceDTO spaceDTO, User user) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(spaceDTO.getWorkspaceId(), user.getId()).get();
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
                 isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {

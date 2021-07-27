@@ -1,5 +1,6 @@
 package com.example.taskmanagementsystemapp.payload;
 
+import com.example.taskmanagementsystemapp.entity.Workspace;
 import com.example.taskmanagementsystemapp.entity.enums.TaskPermission;
 import lombok.Data;
 
@@ -16,6 +17,9 @@ public class ProjectUserDTO {
 
     @NotNull
     private TaskPermission taskPermission;
+
+    @NotNull
+    private Long workspaceId;
 
 
 }
