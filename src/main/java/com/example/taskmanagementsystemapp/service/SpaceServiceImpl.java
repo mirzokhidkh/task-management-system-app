@@ -1,6 +1,7 @@
 package com.example.taskmanagementsystemapp.service;
 
 import com.example.taskmanagementsystemapp.entity.Space;
+import com.example.taskmanagementsystemapp.entity.SpaceUser;
 import com.example.taskmanagementsystemapp.entity.User;
 import com.example.taskmanagementsystemapp.entity.WorkspaceUser;
 import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
@@ -17,6 +18,8 @@ import static com.example.taskmanagementsystemapp.utils.CommonUtils.isExistsAuth
 public class SpaceServiceImpl implements SpaceService {
     @Autowired
     SpaceRepository spaceRepository;
+    @Autowired
+    SpaceUserRepository spaceUserRepository;
     @Autowired
     WorkspaceRepository workspaceRepository;
     @Autowired
@@ -40,16 +43,27 @@ public class SpaceServiceImpl implements SpaceService {
         if (spaceRepository.existsByNameAndOwnerId(spaceDTO.getName(), spaceDTO.getOwnerId())) {
             return new ApiResponse("Space with such a name and owner already exists", false);
         }
+
+        User spaceOwner = userRepository.findById(spaceDTO.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("id"));
+
         Space space = new Space(
                 spaceDTO.getName(),
                 spaceDTO.getColor(),
                 workspaceRepository.findById(spaceDTO.getWorkspaceId()).orElseThrow(() -> new ResourceNotFoundException("id")),
                 iconRepository.findById(spaceDTO.getIconId()).orElseThrow(() -> new ResourceNotFoundException("id")),
                 attachmentRepository.findById(spaceDTO.getAvatarId()).orElseThrow(() -> new ResourceNotFoundException("id")),
-                userRepository.findById(spaceDTO.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("id")),
+                spaceOwner,
                 spaceDTO.getAccessType()
         );
-        spaceRepository.save(space);
+        Space savedSpace = spaceRepository.save(space);
+
+        SpaceUser spaceUser = new SpaceUser(
+                savedSpace,
+                spaceOwner
+        );
+
+        spaceUserRepository.save(spaceUser);
+
         return new ApiResponse("Space saved", true);
     }
 
