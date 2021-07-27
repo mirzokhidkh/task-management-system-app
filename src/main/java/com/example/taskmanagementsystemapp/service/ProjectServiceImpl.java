@@ -33,6 +33,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ApiResponse addProject(ProjectDTO projectDTO, User user) {
+        if (projectRepository.existsByNameAndSpaceId(projectDTO.getName(), projectDTO.getSpaceId())) {
+            return new ApiResponse("Project with such a name and space already exists", false);
+        }
         if (spaceUserRepository.existsBySpaceIdAndMemberId(projectDTO.getSpaceId(), user.getId())) {
             return new ApiResponse("User is not belong to this project", false);
         }
