@@ -122,7 +122,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ApiResponse editProjectUser(Long projectUserId, ProjectUserDTO projectUserDTO, User user) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(projectUserDTO.getWorkspaceId(), user.getId()).get();
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
                 isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
