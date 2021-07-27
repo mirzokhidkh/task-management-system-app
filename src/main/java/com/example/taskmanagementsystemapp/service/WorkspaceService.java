@@ -4,6 +4,7 @@ import com.example.taskmanagementsystemapp.entity.User;
 import com.example.taskmanagementsystemapp.entity.Workspace;
 import com.example.taskmanagementsystemapp.payload.*;
 
+import javax.jws.soap.SOAPBinding;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public interface WorkspaceService {
 
     ApiResponse getMembersAndGuests(Long id,User user);
 
-    List<Workspace> getAll();
+    ApiResponse getAll(User user);
 
     ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO,User user);
 

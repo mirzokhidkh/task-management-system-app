@@ -106,7 +106,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO, User user) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        WorkspaceUser workspaceUser = workspaceUserRepository
+                .findByWorkspaceIdAndUserId(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
+
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name())) {
             return new ApiResponse("You don't have authority", false);
@@ -213,13 +215,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public List<Workspace> getAll() {
-        List<Workspace> workspaceList = workspaceRepository.findAll();
-        return workspaceList;
+    public ApiResponse getAll(User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
+
+        List<Workspace> workspaceList = workspaceRepository.findAllByOwnerId(user.getId());
+        return new ApiResponse("Users", true, workspaceList);
     }
 
     @Override
-    public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO,User user) {
+    public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
@@ -241,7 +250,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO,User user) {
+    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
@@ -258,7 +267,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO,User user) {
+    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||

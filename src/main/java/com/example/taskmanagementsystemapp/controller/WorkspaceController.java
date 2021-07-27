@@ -95,9 +95,9 @@ public class WorkspaceController {
 
 
     @GetMapping("/all")
-    public HttpEntity<?> getAll() {
-        List<Workspace> workspaces = workspaceService.getAll();
-        return ResponseEntity.ok(workspaces);
+    public HttpEntity<?> getAll(@CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.getAll(user);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping("/addRole")
