@@ -21,7 +21,7 @@ public class ProjectController {
 
 
     @PostMapping
-    public HttpEntity<?> addWorkspace(@Valid @RequestBody ProjectDTO projectDTO, @CurrentUser User user) {
+    public HttpEntity<?> addProject(@Valid @RequestBody ProjectDTO projectDTO, @CurrentUser User user) {
         ApiResponse apiResponse = projectService.addProject(projectDTO, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
