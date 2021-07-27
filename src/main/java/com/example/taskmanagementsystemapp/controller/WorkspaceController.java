@@ -21,7 +21,6 @@ public class WorkspaceController {
     WorkspaceService workspaceService;
 
     /**
-     *
      * @param workspaceDTO
      * @param user
      * @return
@@ -42,8 +41,8 @@ public class WorkspaceController {
      */
 
     @PutMapping("/{id}")
-    public HttpEntity<?> editWorkspace(@PathVariable Long id, @RequestBody WorkspaceDTO workspaceDTO) {
-        ApiResponse apiResponse = workspaceService.editWorkspace(id, workspaceDTO);
+    public HttpEntity<?> editWorkspace(@PathVariable Long id, @RequestBody WorkspaceDTO workspaceDTO, @CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.editWorkspace(id, workspaceDTO, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -74,8 +73,9 @@ public class WorkspaceController {
 
     @PostMapping("/addOrEditOrRemove/{id}")
     public HttpEntity<?> addOrEditOrRemoveWorkspace(@PathVariable Long id,
-                                                    @RequestBody MemberDTO memberDTO) {
-        ApiResponse apiResponse = workspaceService.addOrEditOrRemoveWorkspace(id, memberDTO);
+                                                    @RequestBody MemberDTO memberDTO,
+                                                    @CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.addOrEditOrRemoveWorkspace(id, memberDTO,user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -89,8 +89,8 @@ public class WorkspaceController {
     @GetMapping("/membersAndGuests")
     public HttpEntity<?> getMembersAndGuests(@RequestParam Long id,
                                              @CurrentUser User user) {
-        List<User> membersAndGuests = workspaceService.getMembersAndGuests(id);
-        return ResponseEntity.ok(membersAndGuests);
+        ApiResponse apiResponse = workspaceService.getMembersAndGuests(id, user);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
 
@@ -101,21 +101,21 @@ public class WorkspaceController {
     }
 
     @GetMapping("/addRole")
-    public HttpEntity<?> addRole(@RequestBody WorkspaceRoleDTO workspaceRoleDTO) {
-        ApiResponse apiResponse = workspaceService.addRole(workspaceRoleDTO);
+    public HttpEntity<?> addRole(@RequestBody WorkspaceRoleDTO workspaceRoleDTO,@CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.addRole(workspaceRoleDTO,user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 201 : 409).body(apiResponse);
     }
 
 
     @GetMapping("/addPermission")
-    public HttpEntity<?> addPermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO) {
-        ApiResponse apiResponse = workspaceService.addPermission(workspacePermissionDTO);
+    public HttpEntity<?> addPermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO, @CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.addPermission(workspacePermissionDTO,user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 201 : 409).body(apiResponse);
     }
 
     @GetMapping("/removePermission")
-    public HttpEntity<?> removePermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO) {
-        ApiResponse apiResponse = workspaceService.removePermission(workspacePermissionDTO);
+    public HttpEntity<?> removePermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO, @CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.removePermission(workspacePermissionDTO,user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 204 : 409).body(apiResponse);
     }
 }

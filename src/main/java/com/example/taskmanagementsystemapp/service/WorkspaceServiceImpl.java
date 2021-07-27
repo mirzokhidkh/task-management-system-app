@@ -1,6 +1,8 @@
 package com.example.taskmanagementsystemapp.service;
 
+import com.example.taskmanagementsystemapp.entity.enums.SystemRoleName;
 import com.example.taskmanagementsystemapp.payload.*;
+import com.example.taskmanagementsystemapp.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.*;
 
 import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_GUEST;
 import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_MEMBER;
+import static com.example.taskmanagementsystemapp.utils.CommonUtils.*;
 
 
 @Service
@@ -40,7 +43,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         //WORKSPACE OCHDIK
         if (workspaceRepository.existsByOwnerIdAndName(user.getId(), workspaceDTO.getName()))
             return new ApiResponse("Sizda bunday nomli ishxona mavjud", false);
-
         Workspace workspace = new Workspace(
                 workspaceDTO.getName(),
                 workspaceDTO.getColor(),
@@ -102,23 +104,33 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return new ApiResponse("Ishxona saqlandi", true);
     }
 
-
     @Override
-    public ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO) {
+    public ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO, User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name())) {
+            return new ApiResponse("You don't have authority", false);
+        }
         Workspace editingWorkspace = workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id"));
         editingWorkspace.setName(workspaceDTO.getName());
         editingWorkspace.setColor(workspaceDTO.getColor());
         editingWorkspace.setAvatar(attachmentRepository
-                .findById(workspaceDTO.getAvatarId()).orElseThrow(() -> new ResourceNotFoundException(workspaceDTO.getAvatarId().toString())));
+                .findById(workspaceDTO.getAvatarId()).orElseThrow(() -> new ResourceNotFoundException("Avatar id")));
         workspaceRepository.save(editingWorkspace);
         return new ApiResponse("Workspace edited", true);
     }
 
     @Override
     public ApiResponse changeOwnerWorkspace(Long id, UUID ownerId, User user) {
-        User newOwner = userRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("id"));
         WorkspaceUser workspaceUser = workspaceUserRepository
                 .findByWorkspaceIdAndUserId(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
+
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name())) {
+            return new ApiResponse("You don't have authority", false);
+        }
+        User newOwner = userRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("id"));
+
         workspaceUser.setUser(newOwner);
         workspaceUserRepository.save(workspaceUser);
 
@@ -130,6 +142,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public ApiResponse deleteWorkspace(Long id) {
+
         try {
             workspaceRepository.deleteById(id);
             return new ApiResponse("O'chirildi", true);
@@ -139,20 +152,25 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse addOrEditOrRemoveWorkspace(Long id, MemberDTO memberDTO) {
+    public ApiResponse addOrEditOrRemoveWorkspace(Long id, MemberDTO memberDTO, User user) {
+        WorkspaceUser curWorkspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = curWorkspaceUser.getWorkspaceRole().getName();
+        if (!isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name())) {
+            return new ApiResponse("You don't have authority", false);
+        }
         User member = userRepository.findById(memberDTO.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
         if (memberDTO.getAddType().equals(AddType.ADD)) {
-            WorkspaceUser workspaceUser = new WorkspaceUser(
+            WorkspaceUser newWorkspaceUser = new WorkspaceUser(
                     workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id")),
                     member,
                     workspaceRoleRepository.findById(memberDTO.getRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")),
                     new Timestamp(System.currentTimeMillis()),
                     null
             );
-            workspaceUserRepository.save(workspaceUser);
+            workspaceUserRepository.save(newWorkspaceUser);
 
             //TODO EMAILGA INVITE XABAR YUBORISH
-            String text = "Confirm => http://localhost:8080/api/workspace/join?id=" + id;
+            String text = "Confirm => \n http://localhost:8080/api/workspace/join?id=" + id;
             mailService.sendEmail(member.getEmail(), "Confirm account", text);
 
         } else if (memberDTO.getAddType().equals(AddType.EDIT)) {
@@ -178,14 +196,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public List<User> getMembersAndGuests(Long id) {
+    public ApiResponse getMembersAndGuests(Long id, User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
 
         List<User> users = userRepository.findMembersAndGuestsFromWorkspace(Arrays.asList(
                 workspaceRoleRepository.findByName(ROLE_MEMBER.name()).getId(),
                 workspaceRoleRepository.findByName(ROLE_GUEST.name()).getId()
         ));
 
-        return users;
+        return new ApiResponse("Users", true, users);
     }
 
     @Override
@@ -195,7 +219,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO) {
+    public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO,User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
+
         if (workspaceRoleRepository.existsByName(workspaceRoleDTO.getName())) {
             return new ApiResponse("Role with such a name already exists", false);
         }
@@ -210,7 +241,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO) {
+    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO,User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
+
         WorkspacePermission workspacePermission = new WorkspacePermission(
                 workspaceRoleRepository.findById(workspacePermissionDTO.getWorkspaceRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")),
                 workspacePermissionDTO.getPermission()
@@ -220,7 +258,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO) {
+    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO,User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
+
         UUID id = workspacePermissionRepository.getId(workspacePermissionDTO.getWorkspaceRoleId(), workspacePermissionDTO.getPermission().name());
         try {
             workspacePermissionRepository.deleteById(id);

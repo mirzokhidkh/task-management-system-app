@@ -12,23 +12,23 @@ public interface WorkspaceService {
 
     ApiResponse addWorkspace(WorkspaceDTO workspaceDTO, User user);
 
-    ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO);
+    ApiResponse editWorkspace(Long id, WorkspaceDTO workspaceDTO,User user);
 
     ApiResponse changeOwnerWorkspace(Long id, UUID ownerId, User user);
 
     ApiResponse deleteWorkspace(Long id);
 
-    ApiResponse addOrEditOrRemoveWorkspace(Long id, MemberDTO memberDTO);
+    ApiResponse addOrEditOrRemoveWorkspace(Long id, MemberDTO memberDTO,User user);
 
     ApiResponse joinToWorkspace(Long id, User user);
 
-    List<User> getMembersAndGuests(Long id);
+    ApiResponse getMembersAndGuests(Long id,User user);
 
     List<Workspace> getAll();
 
-    ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO);
+    ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO,User user);
 
-    ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO);
+    ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO,User user);
 
-    ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO);
+    ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO,User user);
 }

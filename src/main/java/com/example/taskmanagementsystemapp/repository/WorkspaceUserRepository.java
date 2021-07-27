@@ -4,6 +4,7 @@ import com.example.taskmanagementsystemapp.entity.WorkspaceRole;
 import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.taskmanagementsystemapp.entity.WorkspaceUser;
 
@@ -18,5 +19,15 @@ public interface WorkspaceUserRepository extends JpaRepository<WorkspaceUser, UU
     @Transactional
     @Modifying
     void deleteByWorkspaceIdAndUserId(Long workspace_id, UUID user_id);
+
+
+    @Query(value = "select wr.name from workspace_user wu \n" +
+            "join workspace_role wr on wu.workspace_role_id=wr.id \n" +
+            "where wu.id = ?1 ",nativeQuery = true)
+    String getRoleName(UUID id);
+
+    WorkspaceUser findByUserId(UUID user_id);
+
+
 
 }

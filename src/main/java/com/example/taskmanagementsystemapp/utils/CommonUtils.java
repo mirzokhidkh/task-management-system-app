@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class CommonUtils {
 
@@ -25,6 +26,9 @@ public class CommonUtils {
         return map;
     }
 
+    public static boolean isExistsAuthority(String workspaceRoleName, String roleName) {
+        return workspaceRoleName.equals(roleName);
+    }
 
 
     public static Integer generateCode() {
