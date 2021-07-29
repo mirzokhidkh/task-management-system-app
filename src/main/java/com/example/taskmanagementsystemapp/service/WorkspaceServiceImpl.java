@@ -1,24 +1,24 @@
 package com.example.taskmanagementsystemapp.service;
 
-import com.example.taskmanagementsystemapp.entity.enums.SystemRoleName;
+import com.example.taskmanagementsystemapp.entity.*;
+import com.example.taskmanagementsystemapp.entity.enums.OperationType;
+import com.example.taskmanagementsystemapp.entity.enums.WorkspacePermissionName;
+import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
 import com.example.taskmanagementsystemapp.payload.*;
-import com.example.taskmanagementsystemapp.utils.CommonUtils;
+import com.example.taskmanagementsystemapp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import com.example.taskmanagementsystemapp.entity.*;
-import com.example.taskmanagementsystemapp.entity.enums.AddType;
-import com.example.taskmanagementsystemapp.entity.enums.WorkspacePermissionName;
-import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
-import com.example.taskmanagementsystemapp.repository.*;
-
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_GUEST;
 import static com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName.ROLE_MEMBER;
-import static com.example.taskmanagementsystemapp.utils.CommonUtils.*;
+import static com.example.taskmanagementsystemapp.utils.CommonUtils.isExistsAuthority;
 
 
 @Service
@@ -161,7 +161,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return new ApiResponse("You don't have authority", false);
         }
         User member = userRepository.findById(memberDTO.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
-        if (memberDTO.getAddType().equals(AddType.ADD)) {
+        if (memberDTO.getOperationType().equals(OperationType.ADD)) {
             WorkspaceUser newWorkspaceUser = new WorkspaceUser(
                     workspaceRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("id")),
                     member,
@@ -175,11 +175,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             String text = "Confirm => \n http://localhost:8080/api/workspace/join?id=" + id;
             mailService.sendEmail(member.getEmail(), "Confirm account", text);
 
-        } else if (memberDTO.getAddType().equals(AddType.EDIT)) {
+        } else if (memberDTO.getOperationType().equals(OperationType.EDIT)) {
             WorkspaceUser workspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(id, memberDTO.getId()).orElseGet(WorkspaceUser::new);
             workspaceUser.setWorkspaceRole(workspaceRoleRepository.findById(memberDTO.getRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")));
             workspaceUserRepository.save(workspaceUser);
-        } else if (memberDTO.getAddType().equals(AddType.REMOVE)) {
+        } else if (memberDTO.getOperationType().equals(OperationType.REMOVE)) {
             workspaceUserRepository.deleteByWorkspaceIdAndUserId(id, memberDTO.getId());
         }
         return new ApiResponse("Successfully done", true);
@@ -198,7 +198,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public ApiResponse getMembersAndGuests(Long id, User user) {
+    public ApiResponse getMembersAndGuests(Long wId, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
@@ -206,16 +206,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return new ApiResponse("You don't have authority", false);
         }
 
-        List<User> users = userRepository.findMembersAndGuestsFromWorkspace(Arrays.asList(
-                workspaceRoleRepository.findByName(ROLE_MEMBER.name()).getId(),
-                workspaceRoleRepository.findByName(ROLE_GUEST.name()).getId()
-        ));
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findAllByWorkspaceId(wId);
 
-        return new ApiResponse("Users", true, users);
+//        List<MemberDTO> members = new ArrayList<>();
+//        for (WorkspaceUser currentWorkspaceUser : workspaceUsers) {
+//            MemberDTO memberDTO = mapWorkspaceUserToMemberDTO(currentWorkspaceUser);
+//            members.add(memberDTO);
+//        }
+
+        List<MemberDTO> members = workspaceUsers.stream().map(this::mapWorkspaceUserToMemberDTO).collect(Collectors.toList());
+        return new ApiResponse("Users", true, members);
     }
 
     @Override
-    public ApiResponse getAll(User user) {
+    public ApiResponse getMyWorkspaces(User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
@@ -223,9 +227,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return new ApiResponse("You don't have authority", false);
         }
 
-        List<Workspace> workspaceList = workspaceRepository.findAllByOwnerId(user.getId());
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findAllByUserId(user.getId());
+        List<WorkspaceDTO> workspaceList = workspaceUsers.stream().map(workspaceUser1 -> mapWorkspaceUserToWorkspaceDTO(workspaceUser1.getWorkspace())).collect(Collectors.toList());
+
         return new ApiResponse("Users", true, workspaceList);
     }
+
 
     @Override
     public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO, User user) {
@@ -236,7 +243,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return new ApiResponse("You don't have authority", false);
         }
 
-        if (workspaceRoleRepository.existsByName(workspaceRoleDTO.getName())) {
+        if (workspaceRoleRepository.existsByNameAndWorkSpaceId(workspaceRoleDTO.getName(), workspaceRoleDTO.getWorkspaceId())) {
             return new ApiResponse("Role with such a name already exists", false);
         }
         WorkspaceRole workspaceRole = new WorkspaceRole(
@@ -244,13 +251,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 workspaceRoleDTO.getName(),
                 workspaceRoleDTO.getExtendsRole()
         );
-
         workspaceRoleRepository.save(workspaceRole);
+        List<WorkspacePermission> workspacePermissions = workspacePermissionRepository
+                        .findAllByWorkspaceRole_NameAndWorkspaceRole_WorkSpaceId(
+                                workspaceRole.getName(),
+                                workspaceRole.getWorkSpace().getId());
+        List<WorkspacePermission> workspacePermissionList = new ArrayList<>();
+        for (WorkspacePermission workspacePermission : workspacePermissions) {
+            WorkspacePermission newWorkspacePermission=new WorkspacePermission(
+                    workspaceRole,
+                    workspacePermission.getPermission()
+            );
+            workspacePermissionList.add(newWorkspacePermission);
+        }
+        workspacePermissionRepository.saveAll(workspacePermissionList);
+
         return new ApiResponse("Role added", true);
     }
 
     @Override
-    public ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO, User user) {
+    public ApiResponse addOrRemovePermissionToRole(WorkspaceRoleDTO workspaceRoleDTO, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
         String roleName = workspaceUser.getWorkspaceRole().getName();
         if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
@@ -258,31 +278,44 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return new ApiResponse("You don't have authority", false);
         }
 
-        WorkspacePermission workspacePermission = new WorkspacePermission(
-                workspaceRoleRepository.findById(workspacePermissionDTO.getWorkspaceRoleId()).orElseThrow(() -> new ResourceNotFoundException("id")),
-                workspacePermissionDTO.getPermission()
-        );
-        workspacePermissionRepository.save(workspacePermission);
-        return new ApiResponse("Permission added", true);
+
+        WorkspaceRole workspaceRole = workspaceRoleRepository.findById(workspaceRoleDTO.getId()).orElseThrow(() -> new ResourceNotFoundException("id"));
+        Optional<WorkspacePermission> optionalWorkspacePermission = workspacePermissionRepository.findByWorkspaceRoleIdAndPermission(workspaceRole.getId(), workspaceRoleDTO.getPermissionName());
+        if (workspaceRoleDTO.getOperationType().equals(OperationType.ADD)) {
+            if (optionalWorkspacePermission.isPresent()) {
+                return new ApiResponse("Already exists", false);
+            }
+            WorkspacePermission workspacePermission = new WorkspacePermission(workspaceRole, workspaceRoleDTO.getPermissionName());
+            workspacePermissionRepository.save(workspacePermission);
+            return new ApiResponse("Added", true);
+        } else if (workspaceRoleDTO.getOperationType().equals(OperationType.REMOVE)) {
+            optionalWorkspacePermission
+                    .ifPresent(workspacePermission -> workspacePermissionRepository.deleteById(workspacePermission.getId()));
+            return new ApiResponse("Removed", true);
+        }
+        return new ApiResponse("This command doesn't exist", true);
     }
 
-    @Override
-    public ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO, User user) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
-        String roleName = workspaceUser.getWorkspaceRole().getName();
-        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
-                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
-            return new ApiResponse("You don't have authority", false);
-        }
 
-        UUID id = workspacePermissionRepository.getId(workspacePermissionDTO.getWorkspaceRoleId(), workspacePermissionDTO.getPermission().name());
-        try {
-            workspacePermissionRepository.deleteById(id);
-            return new ApiResponse("Permission removed", true);
-        } catch (Exception e) {
-            return new ApiResponse("Error", false);
-        }
+    public MemberDTO mapWorkspaceUserToMemberDTO(WorkspaceUser workspaceUser) {
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setId(workspaceUser.getUser().getId());
+        memberDTO.setFullName(workspaceUser.getUser().getFullName());
+        memberDTO.setEmail(workspaceUser.getUser().getEmail());
+        memberDTO.setRoleName(workspaceUser.getWorkspaceRole().getName());
+        memberDTO.setLastActiveTime(workspaceUser.getUser().getLastActiveTime());
+        return memberDTO;
     }
 
+    public WorkspaceDTO mapWorkspaceUserToWorkspaceDTO(Workspace workspace) {
+        WorkspaceDTO workspaceDTO = new WorkspaceDTO();
+        workspaceDTO.setId(workspace.getId());
+        workspaceDTO.setName(workspace.getName());
+        workspaceDTO.setColor(workspace.getColor());
+        Attachment avatar = workspace.getAvatar();
+        workspaceDTO.setAvatarId(avatar != null ? avatar.getId() : null);
+        workspaceDTO.setInitialLetter(workspace.getInitialLetter());
+        return workspaceDTO;
+    }
 
 }

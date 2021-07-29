@@ -1,7 +1,6 @@
 package com.example.taskmanagementsystemapp.controller;
 
 import com.example.taskmanagementsystemapp.entity.User;
-import com.example.taskmanagementsystemapp.entity.Workspace;
 import com.example.taskmanagementsystemapp.payload.*;
 import com.example.taskmanagementsystemapp.security.CurrentUser;
 import com.example.taskmanagementsystemapp.service.WorkspaceService;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,8 +84,8 @@ public class WorkspaceController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @GetMapping("/membersAndGuests")
-    public HttpEntity<?> getMembersAndGuests(@RequestParam Long id,
+    @GetMapping("/membersAndGuests/{id}")
+    public HttpEntity<?> getMembersAndGuests(@PathVariable Long id,
                                              @CurrentUser User user) {
         ApiResponse apiResponse = workspaceService.getMembersAndGuests(id, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
@@ -95,10 +93,11 @@ public class WorkspaceController {
 
 
     @GetMapping("/all")
-    public HttpEntity<?> getAll(@CurrentUser User user) {
-        ApiResponse apiResponse = workspaceService.getAll(user);
+    public HttpEntity<?> getMyWorkspaces(@CurrentUser User user) {
+        ApiResponse apiResponse = workspaceService.getMyWorkspaces(user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
 
     @GetMapping("/addRole")
     public HttpEntity<?> addRole(@RequestBody WorkspaceRoleDTO workspaceRoleDTO,@CurrentUser User user) {
@@ -106,16 +105,9 @@ public class WorkspaceController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 201 : 409).body(apiResponse);
     }
 
-
-    @GetMapping("/addPermission")
-    public HttpEntity<?> addPermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO, @CurrentUser User user) {
-        ApiResponse apiResponse = workspaceService.addPermission(workspacePermissionDTO,user);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 201 : 409).body(apiResponse);
-    }
-
-    @GetMapping("/removePermission")
-    public HttpEntity<?> removePermission(@RequestBody WorkspacePermissionDTO workspacePermissionDTO, @CurrentUser User user) {
-        ApiResponse apiResponse = workspaceService.removePermission(workspacePermissionDTO,user);
+    @PutMapping("/addOrRemovePermission")
+    public HttpEntity<?> addOrRemovePermissionToRole(@RequestBody WorkspaceRoleDTO workspaceRoleDTO,@CurrentUser User user){
+        ApiResponse apiResponse =  workspaceService.addOrRemovePermissionToRole(workspaceRoleDTO,user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 204 : 409).body(apiResponse);
     }
 }

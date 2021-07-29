@@ -1,15 +1,24 @@
 package com.example.taskmanagementsystemapp.payload;
 
 import lombok.Data;
-import com.example.taskmanagementsystemapp.entity.enums.AddType;
+import com.example.taskmanagementsystemapp.entity.enums.OperationType;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
 public class MemberDTO {
     private UUID id;
 
+    private String fullName;
+
+    private String email;
+
+    private String roleName;
+
+    private Timestamp lastActiveTime;
+
     private UUID roleId;
 
-    private AddType addType;//ADD, EDIT, REMOVE
+    private OperationType operationType;//ADD, EDIT, REMOVE
 }

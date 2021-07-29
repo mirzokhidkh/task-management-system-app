@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -43,6 +44,8 @@ public class User extends AbsUUIDEntity implements UserDetails {
     private SystemRoleName systemRoleName;
 
     private String emailCode;
+
+    private Timestamp lastActiveTime;
 
     private boolean enabled;
     private boolean accountNonExpired = true;

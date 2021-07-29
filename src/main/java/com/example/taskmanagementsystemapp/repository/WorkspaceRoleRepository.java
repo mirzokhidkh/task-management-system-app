@@ -6,7 +6,7 @@ import com.example.taskmanagementsystemapp.entity.WorkspaceRole;
 import java.util.UUID;
 
 public interface WorkspaceRoleRepository extends JpaRepository<WorkspaceRole, UUID> {
-    boolean existsByName(String name);
+    boolean existsByNameAndWorkSpaceId(String name, Long workSpace_id);
     WorkspaceRole findByName(String name);
 
 }

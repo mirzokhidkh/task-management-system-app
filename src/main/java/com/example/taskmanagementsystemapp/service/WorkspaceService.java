@@ -1,11 +1,11 @@
 package com.example.taskmanagementsystemapp.service;
 
 import com.example.taskmanagementsystemapp.entity.User;
-import com.example.taskmanagementsystemapp.entity.Workspace;
-import com.example.taskmanagementsystemapp.payload.*;
+import com.example.taskmanagementsystemapp.payload.ApiResponse;
+import com.example.taskmanagementsystemapp.payload.MemberDTO;
+import com.example.taskmanagementsystemapp.payload.WorkspaceDTO;
+import com.example.taskmanagementsystemapp.payload.WorkspaceRoleDTO;
 
-import javax.jws.soap.SOAPBinding;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -25,11 +25,9 @@ public interface WorkspaceService {
 
     ApiResponse getMembersAndGuests(Long id,User user);
 
-    ApiResponse getAll(User user);
+    ApiResponse getMyWorkspaces(User user);
 
     ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO,User user);
 
-    ApiResponse addPermission(WorkspacePermissionDTO workspacePermissionDTO,User user);
-
-    ApiResponse removePermission(WorkspacePermissionDTO workspacePermissionDTO,User user);
+    ApiResponse addOrRemovePermissionToRole(WorkspaceRoleDTO workspaceRoleDTO,User user);
 }

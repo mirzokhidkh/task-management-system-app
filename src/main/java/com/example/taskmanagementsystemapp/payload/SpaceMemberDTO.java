@@ -1,6 +1,5 @@
 package com.example.taskmanagementsystemapp.payload;
 
-import com.example.taskmanagementsystemapp.entity.enums.AddType;
 import lombok.Data;
 
 import java.util.UUID;

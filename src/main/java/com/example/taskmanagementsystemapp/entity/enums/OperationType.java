@@ -1,5 +1,5 @@
 package com.example.taskmanagementsystemapp.entity.enums;
 
-public enum AddType {
+public enum OperationType {
     ADD, EDIT, REMOVE
 }

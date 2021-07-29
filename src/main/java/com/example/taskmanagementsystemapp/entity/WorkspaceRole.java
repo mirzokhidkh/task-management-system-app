@@ -13,9 +13,10 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
 public class WorkspaceRole extends AbsUUIDEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Workspace workSpace;
 
     @Column(nullable = false)
@@ -23,7 +24,6 @@ public class WorkspaceRole extends AbsUUIDEntity {
 
     @Enumerated(EnumType.STRING)
     private WorkspaceRoleName extendsRole;
-
 
 
 }
