@@ -98,7 +98,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ApiResponse addProjectUser(ProjectUserDTO projectUserDTO, User user) {
+    public ApiResponse addProjectUser( ProjectUserDTO projectUserDTO, User user) {
 
         WorkspaceUser workspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(projectUserDTO.getWorkspaceId(), user.getId()).get();
         String roleName = workspaceUser.getWorkspaceRole().getName();

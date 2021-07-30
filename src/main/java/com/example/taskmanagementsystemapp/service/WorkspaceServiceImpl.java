@@ -233,7 +233,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return new ApiResponse("Users", true, workspaceList);
     }
 
-
     @Override
     public ApiResponse addRole(WorkspaceRoleDTO workspaceRoleDTO, User user) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
@@ -295,7 +294,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
         return new ApiResponse("This command doesn't exist", true);
     }
-
 
     public MemberDTO mapWorkspaceUserToMemberDTO(WorkspaceUser workspaceUser) {
         MemberDTO memberDTO = new MemberDTO();
