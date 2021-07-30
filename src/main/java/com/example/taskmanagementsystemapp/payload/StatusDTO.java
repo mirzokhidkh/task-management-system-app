@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusDTO {
+    private Long id;
+
     @NotNull
     private String name;
 
@@ -23,5 +25,8 @@ public class StatusDTO {
 
     private String color;
 
-    private StatusType type;
+    private StatusType statusType;
+
+    private Long workspaceId;
+
 }

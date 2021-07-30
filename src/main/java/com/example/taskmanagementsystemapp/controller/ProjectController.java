@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/workspace")
+@RequestMapping("/api/project")
 public class ProjectController {
     @Autowired
     ProjectService projectService;

@@ -5,5 +5,7 @@ import com.example.taskmanagementsystemapp.payload.ApiResponse;
 import com.example.taskmanagementsystemapp.payload.StatusDTO;
 
 public interface StatusService {
-    ApiResponse addStatus(StatusDTO statusDTO, User user);
+    ApiResponse addOrEditStatus(StatusDTO statusDTO, User user);
+    ApiResponse deleteStatus(Long statusId, User user);
+
 }

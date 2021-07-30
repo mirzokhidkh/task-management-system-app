@@ -14,14 +14,14 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/workspace")
+@RequestMapping("/api/category")
 public class CategoryController {
     @Autowired
     CategoryService categoryService;
 
 
     @PostMapping
-    public HttpEntity<?> addWorkspace(@Valid @RequestBody CategoryDTO categoryDTO, @CurrentUser User user) {
+    public HttpEntity<?> addOrEditCategory(@Valid @RequestBody CategoryDTO categoryDTO, @CurrentUser User user) {
         ApiResponse apiResponse = categoryService.addOrEditCategory(categoryDTO, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
