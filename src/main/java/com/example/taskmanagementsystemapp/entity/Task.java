@@ -1,6 +1,5 @@
 package com.example.taskmanagementsystemapp.entity;
 
-import com.example.taskmanagementsystemapp.entity.template.AbsLongEntity;
 import com.example.taskmanagementsystemapp.entity.template.AbsUUIDEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
