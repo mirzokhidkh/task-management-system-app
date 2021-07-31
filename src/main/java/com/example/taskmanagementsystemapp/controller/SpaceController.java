@@ -27,7 +27,7 @@ public class SpaceController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{spaceId}")
     public HttpEntity<?> deleteWorkspace(@PathVariable Long spaceId, @CurrentUser User user) {
         ApiResponse apiResponse = spaceService.deleteSpace(spaceId, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
