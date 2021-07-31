@@ -1,9 +1,6 @@
 package com.example.taskmanagementsystemapp.service;
 
-import com.example.taskmanagementsystemapp.entity.Space;
-import com.example.taskmanagementsystemapp.entity.SpaceUser;
-import com.example.taskmanagementsystemapp.entity.User;
-import com.example.taskmanagementsystemapp.entity.WorkspaceUser;
+import com.example.taskmanagementsystemapp.entity.*;
 import com.example.taskmanagementsystemapp.entity.enums.WorkspaceRoleName;
 import com.example.taskmanagementsystemapp.payload.ApiResponse;
 import com.example.taskmanagementsystemapp.payload.SpaceDTO;
@@ -11,6 +8,9 @@ import com.example.taskmanagementsystemapp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.taskmanagementsystemapp.utils.CommonUtils.isExistsAuthority;
 
@@ -30,6 +30,8 @@ public class SpaceServiceImpl implements SpaceService {
     UserRepository userRepository;
     @Autowired
     WorkspaceUserRepository workspaceUserRepository;
+    @Autowired
+    SpaceViewRepository spaceViewRepository;
 
     @Override
     public ApiResponse addSpace(SpaceDTO spaceDTO, User user) {
@@ -82,5 +84,19 @@ public class SpaceServiceImpl implements SpaceService {
         } catch (Exception e) {
             return new ApiResponse("Error", false);
         }
+    }
+
+    @Override
+    public ApiResponse getViewsBySpaceId(Long sId, User user) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserId(user.getId());
+        String roleName = workspaceUser.getWorkspaceRole().getName();
+        if (!(isExistsAuthority(roleName, WorkspaceRoleName.ROLE_OWNER.name()) ||
+                isExistsAuthority(roleName, WorkspaceRoleName.ROLE_ADMIN.name()))) {
+            return new ApiResponse("You don't have authority", false);
+        }
+
+        List<SpaceView> spaceViews = spaceViewRepository.findAllBySpaceId(sId);
+        List<View> views = spaceViews.stream().map(spaceView -> new View(spaceView.getView().getName(), spaceView.getView().getIcon())).collect(Collectors.toList());
+        return new ApiResponse("View listy by space id", true, views);
     }
 }

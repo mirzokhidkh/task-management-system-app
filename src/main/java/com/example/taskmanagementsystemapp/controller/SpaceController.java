@@ -33,4 +33,10 @@ public class SpaceController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @GetMapping("/viewsBySpaceId")
+    public HttpEntity<?> getViewsBySpaceId(@RequestParam Long sId, @CurrentUser User user) {
+        ApiResponse apiResponse = spaceService.getViewsBySpaceId(sId, user);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
 }

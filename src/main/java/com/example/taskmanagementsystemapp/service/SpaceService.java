@@ -10,5 +10,7 @@ public interface SpaceService {
 
     ApiResponse deleteSpace(Long spaceId, User user);
 
+    ApiResponse getViewsBySpaceId(Long sId, User user);
+
 
 }
